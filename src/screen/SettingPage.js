@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
+import useActions from '../hooks/useActions';
 
 const SettingPage = () => {
+  const { toggleThemeMode } = useActions()
   return (
     <View>
-      <Text></Text>
+      <Button title={'theme'} onPress={() => { toggleThemeMode() }} />
     </View>
   );
 };

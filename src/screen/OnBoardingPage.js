@@ -1,16 +1,25 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import * as Action from '../redux/actions'
+import useActions from '../hooks/useActions';
+import useTheme from '../hooks/useTheme';
 
 const OnBoardingPage = ({ navigation }) => {
-  const navigate = (screenName) => navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }, { name: screenName }] })
+  const { theme } = useSelector(state => state.themeModeReducer)
+  const navigate = (screenName) => navigation.reset({
+    index: 0,
+    routes: [{ name: 'Onboarding' }, { name: screenName }]
+  })
+  const Theme = useTheme()
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Wordle Clone</Text>
       <View style={styles.TO_container}>
-        <TO text={'Start'} onPress={() => navigate('Wordle')} />
-        <TO text={'Settings'} onPress={() => navigate('Settings')} />
-        <TO text={'Statistics'} onPress={() => navigate('Statistics')} />
+        <TO theme={Theme} text={'Start'} onPress={() => navigate('Wordle')} />
+        <TO theme={Theme} text={'Settings'} onPress={() => navigate('Settings')} />
+        <TO theme={Theme} text={'Statistics'} onPress={() => navigate('Statistics')} />
       </View>
       <Text style={styles.versionText}>
         ver. 1.0.0
@@ -56,9 +65,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const TO = ({ text, onPress }) => {
+const TO = ({ text, onPress, theme }) => {
   return (
-    <TouchableOpacity style={styles.TO} onPress={onPress}>
+    <TouchableOpacity style={[styles.TO, { borderColor: theme.text, backgroundColor: theme.primary, text: theme.color }]} onPress={onPress}>
       <Text style={styles.TO_text}>{text}</Text>
     </TouchableOpacity>
   )

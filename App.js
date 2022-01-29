@@ -9,27 +9,31 @@ import StatisticPage from './src/screen/StatisticPage';
 import { RowView } from './src/Lib/Lib';
 import SettingIcon from './src/images/icons/SettingIcon';
 import BarChartIcon from './src/images/icons/BarChartIcon';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
 const Stack = createNativeStackNavigator()
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerTitleAlign: 'center', headerTitleStyle: { fontSize: 24 } }}>
-        <Stack.Screen name='Onboarding' component={OnBoardingPage}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name='Wordle' component={MainPage}
-          options={{ headerRight: HeaderRight }}
-        />
-        <Stack.Screen name='Settings' component={SettingPage}
-          options={{ headerRight: HeaderRight }}
-        />
-        <Stack.Screen name='Statistics' component={StatisticPage}
-          options={{ headerRight: HeaderRight }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerTitleAlign: 'center', headerTitleStyle: { fontSize: 24 } }}>
+          <Stack.Screen name='Onboarding' component={OnBoardingPage}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name='Wordle' component={MainPage}
+            options={{ headerRight: HeaderRight }}
+          />
+          <Stack.Screen name='Settings' component={SettingPage}
+            options={{ headerRight: HeaderRight }}
+          />
+          <Stack.Screen name='Statistics' component={StatisticPage}
+            options={{ headerRight: HeaderRight }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 };
 
