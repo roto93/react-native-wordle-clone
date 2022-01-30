@@ -11,13 +11,14 @@ import SettingIcon from './src/images/icons/SettingIcon';
 import BarChartIcon from './src/images/icons/BarChartIcon';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
+import { navigationRef, rootNavigate } from './rootNavigation';
 
 const Stack = createNativeStackNavigator()
 
 const App = () => {
   return (
     <Provider store={store}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator screenOptions={{ headerTitleAlign: 'center', headerTitleStyle: { fontSize: 24 } }}>
           <Stack.Screen name='Onboarding' component={OnBoardingPage}
             options={{ headerShown: false }}
@@ -25,12 +26,8 @@ const App = () => {
           <Stack.Screen name='Wordle' component={MainPage}
             options={{ headerRight: HeaderRight }}
           />
-          <Stack.Screen name='Settings' component={SettingPage}
-            options={{ headerRight: HeaderRight }}
-          />
-          <Stack.Screen name='Statistics' component={StatisticPage}
-            options={{ headerRight: HeaderRight }}
-          />
+          <Stack.Screen name='Settings' component={SettingPage} />
+          <Stack.Screen name='Statistics' component={StatisticPage} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
@@ -59,10 +56,10 @@ const styles = StyleSheet.create({
 const HeaderRight = () => {
   return (
     <RowView>
-      <TouchableOpacity style={styles.headerTO}>
+      <TouchableOpacity style={styles.headerTO} onPress={() => { rootNavigate('Settings') }}>
         <SettingIcon color={'#000'} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.headerTO}>
+      <TouchableOpacity style={styles.headerTO} onPress={() => { rootNavigate('Statistics') }}>
         <BarChartIcon color={'#000'} />
       </TouchableOpacity>
     </RowView>
