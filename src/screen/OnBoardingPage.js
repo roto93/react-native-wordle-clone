@@ -6,7 +6,6 @@ import useActions from '../hooks/useActions';
 import useTheme from '../hooks/useTheme';
 
 const OnBoardingPage = ({ navigation }) => {
-  const { theme } = useSelector(state => state.themeModeReducer)
   const navigate = (screenName) => navigation.reset({
     index: 0,
     routes: [{ name: 'Onboarding' }, { name: screenName }]
@@ -14,7 +13,7 @@ const OnBoardingPage = ({ navigation }) => {
   const Theme = useTheme()
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: Theme.primary }]}>
       <Text style={styles.title}>Wordle Clone</Text>
       <View style={styles.TO_container}>
         <TO theme={Theme} text={'Start'} onPress={() => navigate('Wordle')} />

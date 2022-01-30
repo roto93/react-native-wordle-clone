@@ -6,7 +6,7 @@ export const winY = Dimensions.get('window').height
 
 export const RowView = (props) => {
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center' }, props.styles]}>
+    <View style={[{ flexDirection: 'row', alignItems: 'center' }, props.style]}>
       {props.children}
     </View>
   )
