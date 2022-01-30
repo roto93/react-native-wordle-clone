@@ -15,3 +15,12 @@ export const toggleIsUpperCase = (bool) => {
     payload: { currentState: bool }
   }
 }
+
+export const TOGGLE_IS_HARD_MODE = 'TOGGLE_IS_HARD_MODE'
+
+export const toggleIsHardMode = (bool) => {
+  return {
+    type: TOGGLE_IS_HARD_MODE,
+    payload: { currentState: bool }
+  }
+}

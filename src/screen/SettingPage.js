@@ -7,14 +7,15 @@ import { toggleThemeMode } from '../redux/actions';
 import useTheme from '../hooks/useTheme';
 
 const SettingPage = () => {
-  const { toggleThemeMode, toggleIsUpperCase } = useActions()
+  const { toggleThemeMode, toggleIsUpperCase, toggleIsHardMode } = useActions()
   const { themeMode } = useSelector(state => state.themeModeReducer)
   const { isUpperCase } = useSelector(state => state.isUpperCaseReducer)
+  const { isHardMode } = useSelector(state => state.isHardModeReducer)
   const Theme = useTheme()
   return (
     <View style={[styles.container, { backgroundColor: Theme.primary }]}>
       <ListItem text={'Dark Mode'} value={themeMode === 'dark'} onChange={toggleThemeMode} />
-      <ListItem text={'Hard Mode'} value={isUpperCase} onChange={toggleIsUpperCase} />
+      <ListItem text={'Hard Mode'} value={isHardMode} onChange={toggleIsHardMode} />
       <ListItem text={'Upper Case'} value={isUpperCase} onChange={toggleIsUpperCase} />
     </View>
   );
