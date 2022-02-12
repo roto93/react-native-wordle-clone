@@ -1,5 +1,7 @@
 import React from 'react';
 import { Dimensions, View } from "react-native";
+import * as Storage from '../storage/StorageHelper'
+import { RANDOM_WORD_API_KEY } from '@env'
 
 export const winX = Dimensions.get('window').width
 export const winY = Dimensions.get('window').height
@@ -52,7 +54,7 @@ export const fetchAnswerAPI = async () => {
       "method": "GET",
       "headers": {
         "x-rapidapi-host": "random-words5.p.rapidapi.com",
-        "x-rapidapi-key": "e1eead18a6msh78a43a5891821f4p1bf967jsna8e308b60e82"
+        "x-rapidapi-key": RANDOM_WORD_API_KEY
       }
     })
     const text = await res.text()
@@ -66,8 +68,24 @@ export const checkValidWordAPI = async (inputWord) => {
   try {
     const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${inputWord}`)
     const json = await res.json()
-    return json[0].word !== undefined
+    return Array.isArray(json)
   } catch (e) {
     console.log(e.message)
   }
+}
+
+export const getTodayWord = async () => {
+  try {
+    const todayString = (new Date()).toDateString()
+    const todayWord = await Storage.get(todayString)
+
+    if (todayWord) return todayWord
+
+    const newWord = await fetchAnswerAPI()
+    Storage.set(todayString, newWord)
+    return newWord
+  } catch (e) {
+    console.log(e.message)
+  }
+
 }

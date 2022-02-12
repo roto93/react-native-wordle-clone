@@ -1,9 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useState } from 'react';
 import useTheme from '../hooks/useTheme'
 import { useSelector } from 'react-redux';
-import { checkValidWordAPI, fetchAnswerAPI, getActivePosition, initAnswerArray, initAnswerArrayHard, initKeyArray, RowView } from '../Lib/Lib';
+import { checkValidWordAPI, fetchAnswerAPI, getActivePosition, getTodayWord, initAnswerArray, initAnswerArrayHard, initKeyArray, isWordTodayExisted, RowView } from '../Lib/Lib';
 import { memo } from 'react';
+import * as StorageHelper from '../storage/StorageHelper'
 
 const MainPage = () => {
   const Theme = useTheme()
@@ -29,17 +30,25 @@ const MainPage = () => {
 
     const onKeyPress = async () => {
       if (keyText === 'enter') {
+        if (activeColIndex !== 5) return
         const guess = answerArray[activeRowIndex].map(item => item.value).join('')
         const isValidWord = await checkValidWordAPI(guess)
-        if (isValidWord) console.log(await fetchAnswerAPI(), guess)
+        if (!isValidWord) {
+          alert('This word is not existed.')
+          return
+        }
+        const todayWord = await getTodayWord()
+        console.log(todayWord)
         return
       }
+
       if (keyText === 'del') {
         if (activeColIndex === 0) return
         answerArray[activeRowIndex][activeColIndex - 1] = { value: undefined }
         setAnswerArray([...answerArray])
         return
       }
+
       if (activeColIndex === 5) return
       answerArray[activeRowIndex][activeColIndex] = { value: keyText }
       setAnswerArray([...answerArray])
@@ -63,6 +72,7 @@ const MainPage = () => {
           </RowView>
         )}
       </View>
+      <Button title={'clear'} onPress={async () => { try { await StorageHelper.clear() } catch (e) { console.log(e.message) } }} />
       <View style={styles.key_container}>
         {initKeyArray.map(
           (row, rowIndex) => <RowView key={rowIndex} style={{ width: rowIndex === 0 ? 316 : rowIndex === 1 ? 284 : 336, justifyContent: 'space-between' }}>
