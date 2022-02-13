@@ -1,9 +1,8 @@
-import { Button, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import React from 'react';
 import useActions from '../hooks/useActions';
 import { RowView, winX } from '../Lib/Lib';
 import { useSelector } from 'react-redux';
-import { toggleThemeMode } from '../redux/actions';
 import useTheme from '../hooks/useTheme';
 
 const SettingPage = () => {

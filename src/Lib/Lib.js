@@ -14,21 +14,23 @@ export const RowView = (props) => {
   )
 }
 
-export const initAnswerArray = []
-for (let i = 0; i < 6; i++) {
-  initAnswerArray.push([])
-  for (let j = 0; j < 5; j++) {
-    initAnswerArray[i].push({})
-  }
-}
+export const initAnswerArray = [
+  [{}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}],
+]
 
-export const initAnswerArrayHard = []
-for (let i = 0; i < 6; i++) {
-  initAnswerArrayHard.push([])
-  for (let j = 0; j < 6; j++) {
-    initAnswerArrayHard[i].push({})
-  }
-}
+export const initAnswerArrayHard = [
+  [{}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}],
+]
 
 export const initKeyArray = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -36,21 +38,23 @@ export const initKeyArray = [
   ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'del'],
 ]
 
-export const getActivePosition = (arr) => {
-  let activeRowIndex = arr.findIndex(row => JSON.stringify(row) == JSON.stringify([{}, {}, {}, {}, {}]))
-  if (activeRowIndex === -1) activeRowIndex = 5
-  else if (activeRowIndex === 0) activeRowIndex = 0
-  else { activeRowIndex-- }
-  let activeColIndex = arr[activeRowIndex].findIndex(col => col.value === undefined)
-  if (activeColIndex === -1) activeColIndex = arr[0].length
-  else if (activeRowIndex === 0) activeRowIndex = 0
-  else { activeColIndex-- }
-  return { activeRowIndex, activeColIndex }
+export const getInitActivePosition = (arr, isHardMode) => {
+  let rowIndex, colIndex
+  const emptyRow = isHardMode ? [{}, {}, {}, {}, {}, {}] : [{}, {}, {}, {}, {}]
+  if (JSON.stringify(arr[0]) === JSON.stringify(emptyRow)) rowIndex = 0
+  else if (arr.every(row => JSON.stringify(row) !== JSON.stringify(emptyRow))) rowIndex = 5
+  else rowIndex = arr.findIndex(row => JSON.stringify(row) === JSON.stringify(emptyRow))
+
+  if (arr[rowIndex][0].value === undefined) colIndex = 0
+  else if (arr[rowIndex].every(col => col.value !== undefined)) colIndex = isHardMode ? 6 : 5
+  else colIndex = arr[rowIndex].findIndex(col => col.value === undefined)
+
+  return { row: rowIndex, col: colIndex }
 }
 
-export const fetchAnswerAPI = async () => {
+export const fetchAnswerAPI = async (isHardMode) => {
   try {
-    const res = await fetch("https://random-words5.p.rapidapi.com/getRandom?wordLength=5", {
+    const res = await fetch(`https://random-words5.p.rapidapi.com/getRandom?wordLength=${isHardMode ? 6 : 5}`, {
       "method": "GET",
       "headers": {
         "x-rapidapi-host": "random-words5.p.rapidapi.com",
@@ -74,18 +78,59 @@ export const checkValidWordAPI = async (inputWord) => {
   }
 }
 
-export const getTodayWord = async () => {
+export const getTodayAnswer = async (isHardmode) => {
   try {
     const todayString = (new Date()).toDateString()
-    const todayWord = await Storage.get(todayString)
+    const history = await Storage.get(todayString)
+    if (history) return isHardmode ? JSON.parse(history).hardAnswer : JSON.parse(history).answer
 
-    if (todayWord) return todayWord
-
-    const newWord = await fetchAnswerAPI()
-    Storage.set(todayString, newWord)
-    return newWord
+    const newAnswer = await fetchAnswerAPI(false)
+    const newHardAnswer = await fetchAnswerAPI(true)
+    const newValue = JSON.stringify({ answer: newAnswer, hardAnswer: newHardAnswer })
+    Storage.set(todayString, newValue)
+    return isHardmode ? newHardAnswer : newAnswer
   } catch (e) {
     console.log(e.message)
   }
+}
+/**
+ * 
+ * @param {string} word 
+ * @param {string} answer 
+ * @param {array} array 
+ * [{ value: '', color:'#19896480' },]
+ * @param {number} activeRowIndex 
+ * @returns 
+ */
+export const sendAnswer = (word, answer, array, activeRowIndex) => {
+  if (word === answer) {
+    const newArray = [...array]
+    const checkedWord = newArray[activeRowIndex].map(item => ({ ...item, color: '#19896480' }))
+    newArray[activeRowIndex] = checkedWord
+    return { newArray, isDone: true }
+  }
 
+  const wordArray = [...array[activeRowIndex]]
+  const answerArray = answer.split('')
+  const newWordArray = wordArray.map((item, index) => {
+    if (item.value === answer[index]) return { ...item, color: '#19896480' }
+    else if (answerArray.some(letter => letter === item.value)) return { ...item, color: '#e5e8b6' }
+    return { ...item, color: '#ddd' }
+  })
+  const newArray = [...array]
+  newArray[activeRowIndex] = newWordArray
+
+  return { newArray, isDone: false }
+}
+
+export const loadHistory = async (isHardMode) => {
+  try {
+    const todayString = (new Date()).toDateString()
+    const res = await Storage.get(todayString)
+    console.log('res=', res)
+    const history = JSON.parse(res)
+    console.log(history)
+    if (!history?.array) return isHardMode ? [...initAnswerArrayHard] : [...initAnswerArray]
+    return isHardMode ? history.hardArray : history.array
+  } catch (e) { console.log(e.message) }
 }
