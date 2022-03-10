@@ -15,12 +15,12 @@ export const RowView = (props) => {
 }
 
 export const initAnswerArray = [
-  [{}, {}, {}, {}, {}],
-  [{}, {}, {}, {}, {}],
-  [{}, {}, {}, {}, {}],
-  [{}, {}, {}, {}, {}],
-  [{}, {}, {}, {}, {}],
-  [{}, {}, {}, {}, {}],
+  { highlight: true }, {}, {}, {}, {},
+  {}, {}, {}, {}, {},
+  {}, {}, {}, {}, {},
+  {}, {}, {}, {}, {},
+  {}, {}, {}, {}, {},
+  {}, {}, {}, {}, {},
 ]
 
 export const initAnswerArrayHard = [
@@ -38,19 +38,19 @@ export const initKeyArray = [
   ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'del'],
 ]
 
-export const getInitActivePosition = (arr, isHardMode) => {
-  let rowIndex, colIndex
-  const emptyRow = isHardMode ? [{}, {}, {}, {}, {}, {}] : [{}, {}, {}, {}, {}]
-  if (JSON.stringify(arr[0]) === JSON.stringify(emptyRow)) rowIndex = 0
-  else if (arr.every(row => JSON.stringify(row) !== JSON.stringify(emptyRow))) rowIndex = 5
-  else rowIndex = arr.findIndex(row => JSON.stringify(row) === JSON.stringify(emptyRow))
+// export const getInitActivePosition = (arr, isHardMode) => {
+//   let rowIndex, colIndex
+//   const emptyRow = isHardMode ? [{}, {}, {}, {}, {}, {}] : [{}, {}, {}, {}, {}]
+//   if (JSON.stringify(arr[0]) === JSON.stringify(emptyRow)) rowIndex = 0
+//   else if (arr.every(row => JSON.stringify(row) !== JSON.stringify(emptyRow))) rowIndex = 5
+//   else rowIndex = arr.findIndex(row => JSON.stringify(row) === JSON.stringify(emptyRow))
 
-  if (arr[rowIndex][0].value === undefined) colIndex = 0
-  else if (arr[rowIndex].every(col => col.value !== undefined)) colIndex = isHardMode ? 6 : 5
-  else colIndex = arr[rowIndex].findIndex(col => col.value === undefined)
-
-  return { row: rowIndex, col: colIndex }
-}
+//   if (arr[rowIndex][0].value === undefined) colIndex = 0
+//   else if (arr[rowIndex].every(col => col.value !== undefined)) colIndex = isHardMode ? 6 : 5
+//   else colIndex = arr[rowIndex].findIndex(col => col.value === undefined)
+//   console.log('in', rowIndex, colIndex)
+//   return { row: rowIndex, col: colIndex }
+// }
 
 export const fetchAnswerAPI = async (isHardMode) => {
   try {
@@ -113,10 +113,23 @@ export const sendAnswer = (word, answer, array, activeRowIndex) => {
   const wordArray = [...array[activeRowIndex]]
   const answerArray = answer.split('')
   const newWordArray = wordArray.map((item, index) => {
-    if (item.value === answer[index]) return { ...item, color: '#19896480' }
-    else if (answerArray.some(letter => letter === item.value)) return { ...item, color: '#e5e8b6' }
+    // 先判斷A的
+    if (item.value !== answerArray[index]) return item
+
+    answerArray[index] = ''
+    return { ...item, color: '#19896480' }
+  }).map((item, index) => {
+    if (item.color !== undefined) return item
+    // 再判斷B的
+    const match = letter => letter === item.value
+    if (answerArray.some(match)) {
+      answerArray[answerArray.findIndex(match)] = ''
+      return { ...item, color: '#e5e8b6' }
+    }
     return { ...item, color: '#ddd' }
+
   })
+
   const newArray = [...array]
   newArray[activeRowIndex] = newWordArray
 
@@ -130,7 +143,14 @@ export const loadHistory = async (isHardMode) => {
     console.log('res=', res)
     const history = JSON.parse(res)
     console.log(history)
-    if (!history?.array) return isHardMode ? [...initAnswerArrayHard] : [...initAnswerArray]
+    if (!history?.array) return isHardMode
+      ? JSON.parse(JSON.stringify(initAnswerArrayHard))
+      : JSON.parse(JSON.stringify(initAnswerArray)) //這邊原本用 spread expression 但由於其 shallow copy 的特性，內層的陣列會一直指向最初的記憶體，導致後續操作無法清除資料
     return isHardMode ? history.hardArray : history.array
   } catch (e) { console.log(e.message) }
 }
+
+/**
+ * [{value:'e',highlight:false},{value:'',highlight:true},{value:'',highlight:false},{value:'',highlight:false},{value:'',highlight:false},{value:'',highlight:false},]
+ * 
+ */
